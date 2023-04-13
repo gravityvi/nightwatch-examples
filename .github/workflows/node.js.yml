@@ -4,6 +4,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+  - cron: "0 0 * * *"  
 
 jobs:
   build:
@@ -12,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x, 16.x, 18.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,6 +28,17 @@ jobs:
     - run: sudo apt-get install xvfb
     - name: Run Nightwatch tests
       run: xvfb-run --auto-servernum npm test -- --env chrome
+      
+    - name: "Publish test results"
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3.7.3
+      with: 
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: './tests_output/nightwatch-html-report'
+        force_orphan: true
+        keep_files: true
+        user_name: "gravityvi"
+        user_email: "ravisawlani04@gmail.com"
 
     - name: Upload screenshots
       if: always()
